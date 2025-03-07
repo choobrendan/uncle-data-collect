@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useRef } from 'react';
-import Basketball from './Basketball';
-import './App.css';
-import CommunityCenter from './Community';
+import React, { useState, useEffect, useRef } from "react";
+import Basketball from "./Basketball";
+import "./App.css";
+import CommunityCenter from "./Community";
 
 const App = () => {
   const [latestData, setLatestData] = useState({});
@@ -9,33 +9,64 @@ const App = () => {
   const mousePosition = useRef({ x: 0, y: 0 });
   const isMouseDown = useRef(false);
   const lastHoverElement = useRef(null);
-  const [nextGame,setNextGame] = useState(1)
-  // Categorize elements based on their characteristics
+  const [nextGame, setNextGame] = useState(1);
+  const eyeMovement = useRef({ x: null, y: null });
+
+  useEffect(() => {
+    const webgazer = window.webgazer;
+
+    // Start webgazer and set gaze listener
+    webgazer
+      .setGazeListener((data, clock) => {
+        if (data) {
+          eyeMovement.current = {
+            x: data.x,
+            y: data.y,
+          };
+        }
+        console.log(data, clock);
+      })
+      .begin();
+
+    return () => {
+      webgazer.end();
+    };
+  }, []);
+
   const getHoverType = (element) => {
-    if (!element) return 'none';
-    
+    if (!element) return "none";
+
     // Check class names first
-    const classList = element.classList?.toString() || '';
-    if (classList.includes('button')) return 'button';
-    if (classList.includes('title') || classList.includes('message')) return 'text';
-    if (classList.includes('ball') || classList.includes('hoop')) return 'game-object';
-    
+    const classList = element.classList?.toString() || "";
+    if (classList.includes("button")) return "button";
+    if (classList.includes("title") || classList.includes("message"))
+      return "text";
+    if (classList.includes("ball") || classList.includes("hoop"))
+      return "game-object";
+
     // Then check tag name
-    switch(element.tagName.toLowerCase()) {
-      case 'button': return 'button';
-      case 'img': return 'image';
-      case 'p':
-      case 'h1':
-      case 'h2':
-      case 'h3': return 'text';
-      default: return 'object';
+    switch (element.tagName.toLowerCase()) {
+      case "button":
+        return "button";
+      case "img":
+        return "image";
+      case "p":
+      case "h1":
+      case "h2":
+      case "h3":
+        return "text";
+      default:
+        return "object";
     }
   };
 
   useEffect(() => {
     const handleMouseMove = (e) => {
       mousePosition.current = { x: e.clientX, y: e.clientY };
-      lastHoverElement.current = document.elementFromPoint(e.clientX, e.clientY);
+      lastHoverElement.current = document.elementFromPoint(
+        e.clientX,
+        e.clientY
+      );
     };
 
     const handleMouseDown = () => {
@@ -55,9 +86,9 @@ const App = () => {
     };
 
     // Add global event listeners
-    document.addEventListener('mousemove', handleMouseMove);
-    document.addEventListener('mousedown', handleMouseDown);
-    document.addEventListener('mouseup', handleMouseUp);
+    document.addEventListener("mousemove", handleMouseMove);
+    document.addEventListener("mousedown", handleMouseDown);
+    document.addEventListener("mouseup", handleMouseUp);
 
     // Set up continuous data collection
     const interval = setInterval(() => {
@@ -66,13 +97,15 @@ const App = () => {
         mousePosition.current.x,
         mousePosition.current.y
       );
-      
+
       const newEntry = {
         time: timestamp,
         positionX: mousePosition.current.x,
         positionY: mousePosition.current.y,
         hoverType: getHoverType(currentElement),
-        isMouseDown: isMouseDown.current
+        isMouseDown: isMouseDown.current,
+        eyeX: eyeMovement.current.x, // Add the eye movement X coordinate
+        eyeY: eyeMovement.current.y, // Add the eye movement Y coordinate
       };
 
       dataRef.current = [...dataRef.current, newEntry];
@@ -81,19 +114,20 @@ const App = () => {
 
     return () => {
       clearInterval(interval);
-      document.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('mousedown', handleMouseDown);
-      document.removeEventListener('mouseup', handleMouseUp);
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mousedown", handleMouseDown);
+      document.removeEventListener("mouseup", handleMouseUp);
     };
   }, []);
+
   const handleDownload = () => {
     // Convert data to JSON string
     const jsonString = JSON.stringify(dataRef.current, null, 2);
-    
+
     // Create blob and download
-    const blob = new Blob([jsonString], { type: 'application/json' });
+    const blob = new Blob([jsonString], { type: "application/json" });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
+    const a = document.createElement("a");
     a.href = url;
     a.download = `interaction-data-${new Date().toISOString()}.json`;
     document.body.appendChild(a);
@@ -102,7 +136,7 @@ const App = () => {
     URL.revokeObjectURL(url);
   };
 
-  console.log(nextGame)
+  console.log(nextGame);
   return (
     <div className="app-container">
       <div className="data-panel">
@@ -112,17 +146,16 @@ const App = () => {
           <div>Position X: {latestData.positionX}</div>
           <div>Position Y: {latestData.positionY}</div>
           <div>Hover Type: {latestData.hoverType}</div>
-          <div>Mouse Down: {latestData.isMouseDown ? 'Yes' : 'No'}</div>
+          <div>Mouse Down: {latestData.isMouseDown ? "Yes" : "No"}</div>
+          <div>Eye X: {latestData.eyeX}</div> {/* Display eye movement X */}
+          <div>Eye Y: {latestData.eyeY}</div> {/* Display eye movement Y */}
         </div>
 
-        <button 
-          onClick={handleDownload}
-          className="download-button"
-        >
+        <button onClick={handleDownload} className="download-button">
           Download Data
         </button>
       </div>
-      {(nextGame===0)&&<Basketball setNextGame={setNextGame} />}
+      {nextGame === 0 && <Basketball setNextGame={setNextGame} />}
       <CommunityCenter></CommunityCenter>
     </div>
   );

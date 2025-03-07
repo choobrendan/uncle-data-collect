@@ -8,39 +8,79 @@ const TASKS = [
     hints: [
       'Check multiple sections carefully',
       'Look beyond the main navigation',
-      'Some information might be hidden in sidebars or smaller text'
+      'Information might be in wellness events'
     ],
-    additionalContext: 'This special workshop is designed for seniors with limited mobility. It\'s part of our wellness program and space is limited.'
+    additionalContext: 'Special workshop for seniors with limited mobility, part of our wellness program.'
   },
   {
     id: 'art',
     description: 'Find and Register for the Watercolor Painting Class',
     hints: [
-      'Navigate through multiple dropdowns',
-      'Read small print carefully',
-      'Registration might require multiple steps'
+      'Check class registration forms',
+      'Look in arts & crafts section',
+      'Complete all form fields'
     ],
-    additionalContext: 'The class is taught by a local artist and includes all materials. Limited spots available for seniors interested in exploring their creativity.'
+    additionalContext: 'Beginner-friendly class with materials provided. Limited spots available.'
   },
   {
-    id: 'contact',
-    description: 'Discover Special Parking Arrangements for Mobility-Impaired Visitors',
+    id: 'facility',
+    description: 'Locate the Wheelchair-Accessible Restroom Information',
     hints: [
-      'Check footer links',
-      'Explore accessibility information',
-      'Look for small, easily missed details'
+      'Check accessibility sections',
+      'Look in location maps',
+      'Might be in small print'
     ],
-    additionalContext: 'We offer specialized parking for visitors with mobility challenges. The information is crucial but intentionally not prominently displayed.'
+    additionalContext: 'Important accessibility feature often overlooked by new visitors.'
   },
   {
-    id: 'map',
-    description: 'Locate Accessible Entrance for Community Center',
+    id: 'emergency',
+    description: 'Find Emergency Exit Locations Floor Plan',
     hints: [
-      'Expand interactive elements',
-      'Look for accessibility symbols',
-      'Read between the lines of map information'
+      'Check safety information',
+      'Look in hidden menus',
+      'Might require map interaction'
     ],
-    additionalContext: 'The main entrance has specific accessibility features. Finding the exact location requires careful navigation.'
+    additionalContext: 'Critical safety information required by law but not prominently displayed.'
+  },
+  {
+    id: 'volunteer',
+    description: 'Sign Up for Community Volunteering Opportunities',
+    hints: [
+      'Check secondary navigation',
+      'Look for forms with time commitments',
+      'Might be in multiple sections'
+    ],
+    additionalContext: 'We need helpers for events and daily operations. Background check required.'
+  },
+  {
+    id: 'transport',
+    description: 'Find Public Transportation Schedule to Center',
+    hints: [
+      'Check location section',
+      'Look for PDF downloads',
+      'Might be in accessibility info'
+    ],
+    additionalContext: 'Updated bus schedules available but not prominently featured.'
+  },
+  {
+    id: 'donation',
+    description: 'Make a Virtual Donation to the Center',
+    hints: [
+      'Look for payment forms',
+      'Check secondary menus',
+      'Might require multiple steps'
+    ],
+    additionalContext: 'We rely on community support. All donations are tax-deductible.'
+  },
+  {
+    id: 'bookclub',
+    description: 'Join the Senior Fiction Book Discussion Group',
+    hints: [
+      'Check events calendar',
+      'Look in special programs',
+      'Might be in newsletter'
+    ],
+    additionalContext: 'Monthly literary discussion group meeting in the community library.'
   }
 ];
 
@@ -76,6 +116,23 @@ const EVENTS_DATA = [
         description: 'Social knitting and craft sharing',
         time: 'Mondays 11:00 AM',
         location: 'Community Room'
+      }
+    ]
+  },
+  {
+    category: 'Special Programs',
+    events: [
+      { 
+        name: 'Senior Fiction Book Club', 
+        description: 'Monthly literary discussion group',
+        time: 'Last Friday 3:00 PM',
+        location: 'Community Library'
+      },
+      { 
+        name: 'Community Volunteer Orientation', 
+        description: 'Learn about volunteering opportunities',
+        time: 'First Monday 10:00 AM',
+        location: 'Main Hall'
       }
     ]
   }
@@ -130,8 +187,9 @@ const CommunityCenter = () => {
             {EVENTS_DATA.map((category, index) => (
               <div key={index}>
                 <h3>{category.category}</h3>
+                <div style={{display:"flex",flexDirection:"row",justifyContent:"space-between"}}>
                 {category.events.map((event, eventIndex) => (
-                  <div 
+                  <div  style={{width: "335px"}}
                     key={eventIndex} 
                     className="section-item"
                     onClick={() => {
@@ -146,6 +204,7 @@ const CommunityCenter = () => {
                     <p className="text-small">{event.time} | {event.location}</p>
                   </div>
                 ))}
+                </div>
               </div>
             ))}
           </div>
@@ -247,7 +306,45 @@ const CommunityCenter = () => {
             </div>
           </div>
         );
-      default:
+        case 'about':
+          return (
+            <div className="section">
+              <h2>About Us</h2>
+              <div className="section-item">
+                <h3>Volunteer Opportunities</h3>
+                <form 
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    if (currentTask.id === 'volunteer') handleTaskComplete();
+                  }}
+                >
+                  <input type="text" placeholder="Your Name" required />
+                  <input type="email" placeholder="Email" required />
+                  <button type="submit">Sign Up to Volunteer</button>
+                </form>
+              </div>
+            </div>
+          );
+        case 'support':
+          return (
+            <div className="section">
+              <h2>Support the Center</h2>
+              <div 
+                className="section-item"
+                onClick={() => {
+                  if (currentTask.id === 'donation') handleTaskComplete();
+                }}
+              >
+                <h3>Make a Donation</h3>
+                <form>
+                  <input type="number" placeholder="Amount ($)" required />
+                  <input type="text" placeholder="Card Number" required />
+                  <button type="submit">Donate Now</button>
+                </form>
+              </div>
+            </div>
+          );
+        default:
         return (
           <div className="section">
             <h2>Welcome to Community Center</h2>
@@ -269,31 +366,11 @@ const CommunityCenter = () => {
 
   return (
     <div className="container">
+
       <nav className="navbar">
-        <div>
+        <div style={{display:"flex",flexDirection:"row",width:"100%", justifyContent:"space-between"}}> 
           <h1>Community Center</h1>
-          <div>
-            {[
-              { icon: '🏠', name: 'home', label: 'Home' },
-              { icon: '📅', name: 'events', label: 'Events' },
-              { icon: '🎨', name: 'classes', label: 'Classes' },
-              { icon: '📞', name: 'contact', label: 'Contact' },
-              { icon: '📍', name: 'map', label: 'Location' }
-            ].map((item) => (
-              <button
-                key={item.name}
-                className={activeSection === item.name ? 'active' : ''}
-                onClick={() => {
-                  setActiveSection(item.name);
-                  logInteraction('navigation', { section: item.name });
-                }}
-              >
-                {item.icon} {item.label}
-              </button>
-            ))}
-          </div>
-        </div>
-        <div className="search">
+          <div className="search">
           <input
             ref={searchInputRef}
             type="text"
@@ -305,6 +382,30 @@ const CommunityCenter = () => {
             }}
           />
         </div>
+
+        </div>
+        <div style={{display:"flex",flexDirection:"row",justifyContent:"space-between" ,width:"100%"}}>
+        {[
+  { icon: '🏠', name: 'home', label: 'Home' },
+  { icon: '📅', name: 'events', label: 'Events' },
+  { icon: '🎨', name: 'classes', label: 'Classes' },
+  { icon: '❤️', name: 'support', label: 'Support' },
+  { icon: '👥', name: 'about', label: 'About' },
+  { icon: '📞', name: 'contact', label: 'Contact' },
+  { icon: '📍', name: 'map', label: 'Location' }
+            ].map((item) => (
+              <button style={{margin:"5px"}}
+                key={item.name}
+                className={activeSection === item.name ? 'active' : ''}
+                onClick={() => {
+                  setActiveSection(item.name);
+                  logInteraction('navigation', { section: item.name });
+                }}
+              >
+                {item.icon} {item.label}
+              </button>
+            ))}
+          </div>
       </nav>
 
       <div className="task-display">
