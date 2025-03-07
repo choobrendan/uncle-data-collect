@@ -265,7 +265,7 @@ const Basketball = ({setNextGame}) => {
   return (
     <div className="container">
       <h1 className="title">Level {level}</h1>
-      {message && <div className="message">{message}</div>}
+
       <div
         className="court"
         onMouseDown={handleMouseDown}
@@ -314,7 +314,7 @@ style={{
           <div className="ball-horizontal" />
         </div>
       </div>
-
+      {message && <div className="message">{message}</div>}
       <div className="button-container">
   {isDropped ? (
     <button onClick={handleProceed} className="button">

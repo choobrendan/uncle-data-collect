@@ -138,7 +138,7 @@ const EVENTS_DATA = [
   }
 ];
 
-const CommunityCenter = () => {
+const CommunityCenter = ({setNextGame}) => {
   const [currentTask, setCurrentTask] = useState(null);
   const [activeSection, setActiveSection] = useState('home');
   const [taskComplete, setTaskComplete] = useState(false);
@@ -147,6 +147,10 @@ const CommunityCenter = () => {
   const [interactionLog, setInteractionLog] = useState([]);
   const [taskStartTime, setTaskStartTime] = useState(null);
   const searchInputRef = useRef(null);
+
+const nextGame=()=>{
+  setNextGame(2)
+}
 
   useEffect(() => {
     const randomTask = TASKS[Math.floor(Math.random() * TASKS.length)];
@@ -437,7 +441,7 @@ const CommunityCenter = () => {
           <h2>Task Completed!</h2>
           <p>Great job navigating the website!</p>
           <p>Time Taken: {((Date.now() - taskStartTime) / 1000).toFixed(2)} seconds</p>
-          <button onClick={() => window.location.reload()}>Try Another Task</button>
+          <button onClick={() => {window.location.reload();nextGame()}}>Try Another Task</button>
           <button onClick={() => {
             const logBlob = new Blob(
               [JSON.stringify(interactionLog, null, 2)], 

@@ -2,36 +2,44 @@ import React, { useState, useEffect, useRef } from "react";
 import Basketball from "./Basketball";
 import "./App.css";
 import CommunityCenter from "./Community";
-
+import Survey from "./Survey";
 const App = () => {
   const [latestData, setLatestData] = useState({});
   const dataRef = useRef([]);
   const mousePosition = useRef({ x: 0, y: 0 });
   const isMouseDown = useRef(false);
   const lastHoverElement = useRef(null);
-  const [nextGame, setNextGame] = useState(1);
+  const [nextGame, setNextGame] = useState(0);
   const eyeMovement = useRef({ x: null, y: null });
 
-  useEffect(() => {
-    const webgazer = window.webgazer;
 
-    // Start webgazer and set gaze listener
-    webgazer
-      .setGazeListener((data, clock) => {
-        if (data) {
-          eyeMovement.current = {
-            x: data.x,
-            y: data.y,
-          };
-        }
-        console.log(data, clock);
-      })
-      .begin();
+  //EYE
+  // useEffect(() => {
+  //   const webgazer = window.webgazer;
 
-    return () => {
-      webgazer.end();
-    };
-  }, []);
+  //   // Start webgazer and set gaze listener
+  //   webgazer
+  //     .setGazeListener((data, clock) => {
+  //       if (data) {
+  //         eyeMovement.current = {
+  //           x: data.x,
+  //           y: data.y,
+  //         };
+  //       }
+  //       console.log(data, clock);
+  //     })
+  //     .begin();
+
+  //   return () => {
+  //     if (window.webgazer) {
+  //       try {
+  //         window.webgazer.end();
+  //       } catch (error) {
+  //         console.warn("Error ending webgazer:", error);
+  //       }
+  //     }
+  //   };
+  // }, []);
 
   const getHoverType = (element) => {
     if (!element) return "none";
@@ -110,7 +118,7 @@ const App = () => {
 
       dataRef.current = [...dataRef.current, newEntry];
       setLatestData(newEntry);
-    }, 10000); // 0.1 seconds
+    }, 100); // 0.1 seconds
 
     return () => {
       clearInterval(interval);
@@ -136,7 +144,6 @@ const App = () => {
     URL.revokeObjectURL(url);
   };
 
-  console.log(nextGame);
   return (
     <div className="app-container">
       <div className="data-panel">
@@ -156,7 +163,8 @@ const App = () => {
         </button>
       </div>
       {nextGame === 0 && <Basketball setNextGame={setNextGame} />}
-      <CommunityCenter></CommunityCenter>
+      {nextGame === 1 &&<CommunityCenter setNextGame={setNextGame} />}
+      {nextGame === 2 &&<Survey setNextGame={setNextGame} />}
     </div>
   );
 };
