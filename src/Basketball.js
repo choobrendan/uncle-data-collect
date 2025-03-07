@@ -99,7 +99,6 @@ const Basketball = ({setNextGame}) => {
     setIsDropped(false);
     setScored(false);
     setMessage("");
-    console.log(hoopPosition.y);
   }, [level]);
 
   const checkScore = (ballX, ballY) => {
@@ -125,8 +124,11 @@ const Basketball = ({setNextGame}) => {
   };
   const handleProceed = () => {
     if (scored) {
-      setNextGame(1);  // Proceed to the next game
+
       nextLevel();     // Advance to the next level
+    }
+    if (scored && level===5){
+      setNextGame(1);  // Proceed to the next game
     }
   };
   

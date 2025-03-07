@@ -104,7 +104,7 @@ const QUESTIONS = [
   },
 ];
 
-const Survey = () => {
+const Survey = ({setNextGame}) => {
   const [responses, setResponses] = useState({});
   const [submitted, setSubmitted] = useState(false);
   const [selectedLanguage, setSelectedLanguage] = useState('en');
@@ -128,6 +128,11 @@ const Survey = () => {
     if (question.id === 'language-proficiency') return LANGUAGE[selectedLanguage].languageQuestion;
     return LANGUAGE[selectedLanguage][question.questionKey || question.id];
   };
+
+  const nextGame=()=>{
+    setNextGame(1)
+  }
+
 
   const renderQuestion = (question) => {
     const currentLang = LANGUAGE[selectedLanguage];
