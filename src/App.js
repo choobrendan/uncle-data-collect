@@ -10,7 +10,7 @@ const App = () => {
   const mousePosition = useRef({ x: 0, y: 0 });
   const isMouseDown = useRef(false);
   const lastHoverElement = useRef(null);
-  const [nextGame, setNextGame] = useState(1);
+  const [nextGame, setNextGame] = useState(0);
   const eyeMovement = useRef({ x: null, y: null });
   const lastScrollPosition = useRef(0); // Store last scroll position
   const scrollDirection = useRef("none"); // Store current scroll direction
