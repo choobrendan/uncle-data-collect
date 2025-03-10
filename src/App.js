@@ -3,122 +3,47 @@ import Basketball from "./Basketball";
 import "./App.css";
 import CommunityCenter from "./Community";
 import Survey from "./Survey";
+import { createClient } from "@supabase/supabase-js";
 
 const App = () => {
-  const [latestData, setLatestData] = useState({});
-  const dataRef = useRef([]);
+  const [latestData, setLatestData] = useState({
+    timeseries: [],
+    question1: "",
+    question2: "",
+    question3: "",
+    question4: "",
+    question5: "",
+    question6: "",
+    question7: "",
+    question8: "",
+  });
+
+  const dataRef = useRef({
+    timeseries: [],
+    question1: "",
+    question2: "",
+    question3: "",
+    question4: "",
+    question5: "",
+    question6: "",
+    question7: "",
+    question8: "",
+  });
+
   const mousePosition = useRef({ x: 0, y: 0 });
   const isMouseDown = useRef(false);
   const lastHoverElement = useRef(null);
-  const [nextGame, setNextGame] = useState(0);
+  const [nextGame, setNextGame] = useState(2);
   const eyeMovement = useRef({ x: null, y: null });
-  const lastScrollPosition = useRef(0); // Store last scroll position
-  const scrollDirection = useRef("none"); // Store current scroll direction
+  const lastScrollPosition = useRef(0);
+  const scrollDirection = useRef("none");
 
-  // Function to determine scroll direction
+  const [responses, setResponses] = useState({});
 
-
-  // Eye movement tracking (this is commented out in your provided code)
-  // useEffect(() => {
-  //   const webgazer = window.webgazer;
-
-  //   // Start webgazer and set gaze listener
-  //   webgazer
-  //     .setGazeListener((data, clock) => {
-  //       if (data) {
-  //         eyeMovement.current = {
-  //           x: data.x,
-  //           y: data.y,
-  //         };
-  //       }
-  //       console.log(data, clock);
-  //     })
-  //     .begin();
-
-  //   return () => {
-  //     if (window.webgazer) {
-  //       try {
-  //         window.webgazer.end();
-  //       } catch (error) {
-  //         console.warn("Error ending webgazer:", error);
-  //       }
-  //     }
-  //   };
-  // }, []);
-
-  const getHoverType = (element) => {
-    if (!element) return "none";
-  
-    // Check ARIA roles first for accessibility
-    const role = element.getAttribute?.('role') || '';
-    const classList = element.classList?.toString().toLowerCase() || "";
-    const tagName = element.tagName?.toLowerCase() || "";
-    const inputType = element.type?.toLowerCase() || "";
-    const parent = element.parentElement;
-  
-    // Check for interactive elements first
-    if (role === 'button' || classList.includes('btn') || classList.includes('button')) 
-      return "button";
-    if (role === 'link' || tagName === 'a') return "link";
-    if (classList.includes('icon')) return "icon";
-    
-    // Form elements
-    if (tagName === 'input') {
-      if (inputType === 'search' || classList.includes('search')) return "search-bar";
-      if (inputType === 'checkbox') return "checkbox";
-      if (inputType === 'radio') return "radio";
-      return "text-input";
-    }
-    if (tagName === 'textarea') return "text-area";
-    if (tagName === 'select') return "dropdown";
-  
-    // Navigation elements
-    if (role === 'navigation' || classList.includes('nav')) return "navigation-container";
-    if (classList.includes('navbar-item') || classList.includes('nav-item')) return "navbar-item";
-    if (classList.includes('breadcrumb')) return "breadcrumb";
-    if (classList.includes('pagination')) return "pagination";
-  
-    // Text content types
-    if (['h1','h2','h3','h4','h5','h6'].includes(tagName)) return "text";
-    if (tagName === 'p' ) return "text";
-    if (classList.includes('caption')) return "text";
-    if (tagName === 'button') return "button";
-    // Media elements
-    if (tagName === 'img') return classList.includes('icon') ? "icon" : "image";
-    if (tagName === 'video') return "video";
-    if (tagName === 'audio') return "audio";
-  
-    // Containers and layout
-    if (['header','footer','aside','main','section'].includes(tagName)) return "layout-container";
-    if (classList.includes('card')) return "card-container";
-    if (classList.includes('modal') || classList.includes('dialog')) return "modal";
-    if (classList.includes('tooltip')) return "tooltip";
-    
-    // Lists and tables
-    if (tagName === 'li') return "list-item";
-    if (tagName === 'tr') return "table-row";
-    if (tagName === 'td') return "table-cell";
-    
-    // Special cases
-    if (classList.includes('spinner')) return "loader";
-    if (classList.includes('progress')) return "progress-indicator";
-    if (classList.includes('badge')) return "status-badge";
-    
-    // Text within interactive elements
-    if (parent) {
-      const parentType = getHoverType(parent);
-      if (parentType === 'button') return "button-text";
-      if (parentType === 'link') return "link-text";
-      if (parentType === 'card') return "card-text";
-    }
-  
-    // Fallback to generic types
-    if (classList.includes('text')) return "static-text";
-    if (element.isContentEditable) return "editable-content";
-    
-    return "container"; // Default for unclassified elements
-  };
-
+  const supabaseUrl = "https://hgatxkpmrskbdqigenav.supabase.co";
+  const supabaseKey = process.env.REACT_APP_SUPABASE_KEY;
+  const supabase = () => createClient(supabaseUrl, supabaseKey);
+  console.log(responses);
   useEffect(() => {
     const handleMouseMove = (e) => {
       mousePosition.current = { x: e.clientX, y: e.clientY };
@@ -144,7 +69,6 @@ const App = () => {
       );
     };
 
-    // Add global event listeners
     document.addEventListener("mousemove", handleMouseMove);
     document.addEventListener("mousedown", handleMouseDown);
     document.addEventListener("mouseup", handleMouseUp);
@@ -160,33 +84,31 @@ const App = () => {
       }
       lastScrollPosition.current = currentScrollPosition;
     };
-    
-    // Set up continuous data collection
+
     const interval = setInterval(() => {
-      // Update the scroll direction every 0.1 seconds
       getScrollDirection();
-    
+
       const timestamp = new Date().toISOString();
       const currentElement = document.elementFromPoint(
         mousePosition.current.x,
         mousePosition.current.y
       );
-    
+
       const newEntry = {
         time: timestamp,
         positionX: mousePosition.current.x,
         positionY: mousePosition.current.y,
         hoverType: getHoverType(currentElement),
         isMouseDown: isMouseDown.current,
-        eyeX: eyeMovement.current.x, // Add the eye movement X coordinate
-        eyeY: eyeMovement.current.y, // Add the eye movement Y coordinate
-        scrollDirection: scrollDirection.current, // Add the scroll direction
+        eyeX: eyeMovement.current.x,
+        eyeY: eyeMovement.current.y,
+        scrollDirection: scrollDirection.current,
       };
-    
-      dataRef.current = [...dataRef.current, newEntry];
-      setLatestData(newEntry);
-    }, 100); // 0.1 seconds
-    
+
+      dataRef.current.timeseries = [...dataRef.current.timeseries, newEntry];
+      setLatestData({ ...dataRef.current });
+    }, 100);
+
     return () => {
       clearInterval(interval);
       document.removeEventListener("mousemove", handleMouseMove);
@@ -196,11 +118,69 @@ const App = () => {
     };
   }, []);
 
-  const handleDownload = () => {
-    // Convert data to JSON string
-    const jsonString = JSON.stringify(dataRef.current, null, 2);
+  const getHoverType = (element) => {
+    if (!element) return "none";
+    const role = element.getAttribute?.("role") || "";
+    const classList = element.classList?.toString().toLowerCase() || "";
+    const tagName = element.tagName?.toLowerCase() || "";
+    const inputType = element.type?.toLowerCase() || "";
+    const parent = element.parentElement;
 
-    // Create blob and download
+    if (
+      role === "button" ||
+      classList.includes("btn") ||
+      classList.includes("button")
+    )
+      return "button";
+    if (role === "link" || tagName === "a") return "link";
+    if (classList.includes("icon")) return "icon";
+    if (tagName === "input") {
+      if (inputType === "search" || classList.includes("search"))
+        return "search-bar";
+      if (inputType === "checkbox") return "checkbox";
+      if (inputType === "radio") return "radio";
+      return "text-input";
+    }
+    if (tagName === "textarea") return "text-area";
+    if (tagName === "select") return "dropdown";
+    if (role === "navigation" || classList.includes("nav"))
+      return "navigation-container";
+    if (classList.includes("navbar-item") || classList.includes("nav-item"))
+      return "navbar-item";
+    if (classList.includes("breadcrumb")) return "breadcrumb";
+    if (classList.includes("pagination")) return "pagination";
+    if (["h1", "h2", "h3", "h4", "h5", "h6"].includes(tagName)) return "text";
+    if (tagName === "p") return "text";
+    if (classList.includes("caption")) return "text";
+    if (tagName === "button") return "button";
+    if (tagName === "img") return classList.includes("icon") ? "icon" : "image";
+    if (tagName === "video") return "video";
+    if (tagName === "audio") return "audio";
+    if (["header", "footer", "aside", "main", "section"].includes(tagName))
+      return "layout-container";
+    if (classList.includes("card")) return "card-container";
+    if (classList.includes("modal") || classList.includes("dialog"))
+      return "modal";
+    if (classList.includes("tooltip")) return "tooltip";
+    if (tagName === "li") return "list-item";
+    if (tagName === "tr") return "table-row";
+    if (tagName === "td") return "table-cell";
+    if (classList.includes("spinner")) return "loader";
+    if (classList.includes("progress")) return "progress-indicator";
+    if (classList.includes("badge")) return "status-badge";
+    if (parent) {
+      const parentType = getHoverType(parent);
+      if (parentType === "button") return "button-text";
+      if (parentType === "link") return "link-text";
+      if (parentType === "card") return "card-text";
+    }
+    if (classList.includes("text")) return "static-text";
+    if (element.isContentEditable) return "editable-content";
+    return "container";
+  };
+
+  const handleDownload = () => {
+    const jsonString = JSON.stringify(dataRef.current, null, 2);
     const blob = new Blob([jsonString], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -212,28 +192,118 @@ const App = () => {
     URL.revokeObjectURL(url);
   };
 
+  async function overwriteTable() {
+    try {
+      console.log(dataRef.current);
+
+      const { timeseries, ...testDataFields } = dataRef.current;
+
+      const { data: dataDataFetch, error: errorDataFetch } = await supabase
+        .from("testData")
+        .select();
+      console.log(dataDataFetch, "dataData");
+      // Handle errors during the 'testData' insertion
+      if (errorDataFetch) {
+        console.error("Error inserting testData:", errorDataFetch);
+        return { data: null, error: errorDataFetch };
+      }
+      let testDataId = dataDataFetch?.[0]?.id + 1 ?? 0;
+      if (!testDataId) {
+        testDataId = 0;
+      }
+      //dataData
+      const { data: dataData, error: errorData } = await supabase
+        .from("testData")
+        .upsert({ ...testDataFields, id: testDataId });
+
+      if (errorData) {
+        console.error("Error inserting testData:", errorData);
+        return { data: null, error: errorData };
+      }
+
+      console.log("Inserted testDataId:", testDataId);
+
+      ///////dataTime
+      const { data: dataTime, error: errorTime } = await supabase
+        .from("testTime")
+        .upsert(
+          timeseries.map((item) => ({
+            ...item,
+            testDataId: testDataId,
+          }))
+        );
+
+      // Handle errors during the 'testTime' insertion
+      if (errorTime) {
+        console.error("Error inserting testTime:", errorTime);
+        return { data: null, error: errorTime };
+      }
+
+      return { dataData, errorData, dataTime, errorTime };
+    } catch (error) {
+      console.error("Unexpected error:", error);
+      return { data: null, error };
+    }
+  }
+
   return (
     <div className="app-container">
       <div className="data-panel">
         <h3>Real-time Interaction Data</h3>
         <div className="data-entry">
-          <div>Time: {latestData.time}</div>
-          <div>Position X: {latestData.positionX}</div>
-          <div>Position Y: {latestData.positionY}</div>
-          <div>Hover Type: {latestData.hoverType}</div>
-          <div>Mouse Down: {latestData.isMouseDown ? "Yes" : "No"}</div>
-          <div>Eye X: {latestData.eyeX}</div> {/* Display eye movement X */}
-          <div>Eye Y: {latestData.eyeY}</div> {/* Display eye movement Y */}
-          <div>Scroll Direction: {latestData.scrollDirection}</div> {/* Display scroll direction */}
+          <div>
+            Time:{" "}
+            {latestData.timeseries[latestData.timeseries.length - 1]?.time}
+          </div>
+          <div>
+            Position X:{" "}
+            {latestData.timeseries[latestData.timeseries.length - 1]?.positionX}
+          </div>
+          <div>
+            Position Y:{" "}
+            {latestData.timeseries[latestData.timeseries.length - 1]?.positionY}
+          </div>
+          <div>
+            Hover Type:{" "}
+            {latestData.timeseries[latestData.timeseries.length - 1]?.hoverType}
+          </div>
+          <div>
+            Mouse Down:{" "}
+            {latestData.timeseries[latestData.timeseries.length - 1]
+              ?.isMouseDown
+              ? "Yes"
+              : "No"}
+          </div>
+          <div>
+            Eye X:{" "}
+            {latestData.timeseries[latestData.timeseries.length - 1]?.eyeX}
+          </div>
+          <div>
+            Eye Y:{" "}
+            {latestData.timeseries[latestData.timeseries.length - 1]?.eyeY}
+          </div>
+          <div>
+            Scroll Direction:{" "}
+            {
+              latestData.timeseries[latestData.timeseries.length - 1]
+                ?.scrollDirection
+            }
+          </div>
         </div>
 
-        <button onClick={handleDownload} className="download-button">
+        <button onClick={overwriteTable} className="download-button">
           Download Data
         </button>
       </div>
       {nextGame === 0 && <Basketball setNextGame={setNextGame} />}
       {nextGame === 1 && <CommunityCenter setNextGame={setNextGame} />}
-      {nextGame === 2 && <Survey setNextGame={setNextGame} />}
+      {nextGame === 2 && (
+        <Survey
+          responses={responses}
+          setResponses={setResponses}
+          setNextGame={setNextGame}
+        />
+      )}
     </div>
   );
 };

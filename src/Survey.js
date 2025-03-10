@@ -9,11 +9,22 @@ const LANGUAGE = {
     languageQuestion: 'What language would you be most comfortable in, if you struggle to understand the website (If Any)?',
     understandQuestion: 'How easy is it for you to understand the instructions on this website? (1 = Very Difficult, 5 = Very Easy)',
     physicalQuestion: 'Do you have any challenges that might make it harder to navigate this website?',
-    physicalOptions: ['Vision impairment', 'Hearing impairment', 'Limited movement', 'Limited website understanding', 'None'],
+    physicalOptions: ['Struggle with reading text', 'Too Much Information on Website', 'Hard to Move Around Website ', 'Unsure of Navigation', 'Hard to Understand Website',"Confusion with icons/symbols.",'None'],
     navigationQuestion: 'Which part of this website do you find the most challenging to navigate?',
     navigationOptions: ['Basketball Game', 'Website Search', 'This Survey'],
     difficultiesQuestion: 'Please describe any other difficulties you face while navigating this website.',
     suggestionsQuestion: 'What suggestions do you have to improve accessibility for users, especially for elderly users?',
+    assistanceQuestion:" How often did you need assistance when using the website?",
+    assistanceOptions:["Never","Rarely","Sometimes","Often"],
+    interactionQuestion:"Do you struggle with any of the following while using devices?",
+    interactionOptions:["Tapping small buttons accurately",
+      "Scrolling smoothly"
+      ,
+      "Using the mouse"
+      ,
+      "Typing on a touchscreen"
+      ,
+      "None"],
     submitButton: 'Submit Survey',
     thankYou: 'Thank you for your feedback!',
     languages: {
@@ -30,7 +41,7 @@ const LANGUAGE = {
     languageQuestion: '如果您在理解本网站内容时有困难，您最习惯使用哪种语言？',
     understandQuestion: '您觉得本网站上的指示容易理解吗？(1 = 非常困难, 5 = 非常容易)',
     physicalQuestion: '您是否有任何障碍可能使您更难浏览本网站？',
-    physicalOptions: ['视力障碍', '听力障碍', '行动不便', '对网站内容理解有限', '无'],
+    physicalOptions: ['网站难以查看', '网站信息过多', '网站难以浏览', '不确定导航', '网站难以理解', '无'],
     navigationQuestion: '您觉得本网站哪个部分最难浏览？',
     navigationOptions: ['篮球比赛', '网站搜索', '本调查'],
     difficultiesQuestion: '请描述您在浏览本网站时遇到的其他困难。',
@@ -51,7 +62,7 @@ const LANGUAGE = {
     languageQuestion: 'Apakah bahasa yang anda paling selesa digunakan jika anda sukar memahami laman web ini (Jika ada)?',
     understandQuestion: 'Adakah sukar untuk anda memahami arahan di laman web ini? (1 = Sangat Sukar, 5 = Sangat Mudah)',
     physicalQuestion: 'Adakah anda mempunyai sebarang cabaran yang mungkin menyukarkan anda untuk melayari laman web ini?',
-    physicalOptions: ['Masalah penglihatan', 'Masalah pendengaran', 'Pergerakan terhad', 'Pemahaman laman web terhad', 'Tiada'],
+    physicalOptions: ['Sukar untuk Melihat Laman Web', 'Terlalu Banyak Maklumat di Laman Web', 'Sukar untuk Bergerak dalam Laman Web', 'Tidak Pasti Navigasi', 'Sukar untuk Memahami Laman Web', 'Tiada'],
     navigationQuestion: 'Bahagian apa dalam laman web ini yang anda rasa paling sukar untuk dilayari?',
     navigationOptions: ['Permainan Bola Keranjang', 'Pencarian Laman Web', 'Kajian Ini'],
     difficultiesQuestion: 'Sila terangkan kesukaran lain yang anda hadapi semasa melayari laman web ini.',
@@ -68,44 +79,57 @@ const LANGUAGE = {
 
 const QUESTIONS = [
   { 
-    id: 'age',
+    id: 'question1',
     type: 'multiple-choice',
     questionKey:"ageQuestion",
     optionsKey: 'ageOptions'
   },
   { 
-    id: 'language-proficiency',
+    id: 'question2',
     type: 'multiple-choice',
     options: ['en', 'zh', 'ms']
   },
   {
-    id: 'understand-instructions',
+    id: 'question3',
     type: 'scale',
     questionKey: 'understandQuestion',
     scale: 5
   },
   {
-    id: 'physical-condition',
+    id: 'question4',
     type: 'multiple-choice',
     questionKey: 'physicalQuestion',
     optionsKey: 'physicalOptions',
     multiple: true
   },
   {
-    id: 'navigation-challenge',
+    id: 'question5',
     type: 'multiple-choice',
     questionKey: 'navigationQuestion',
     optionsKey: 'navigationOptions'
   },
   {
-    id: 'difficulties',
+    id: 'question6',
+    type: 'multiple-choice',
+    questionKey: 'assistanceQuestion',
+    optionsKey: 'assistanceOptions',
+  },
+  {
+    id: 'question7',
+    type: 'multiple-choice',
+    questionKey: 'interactionQuestion',
+    optionsKey: 'interactionOptions',
+    multiple:true
+  },
+  {
+    id: 'question8',
     type: 'text',
     questionKey: 'difficultiesQuestion'
   },
 ];
 
-const Survey = ({setNextGame}) => {
-  const [responses, setResponses] = useState({});
+const Survey = ({setNextGame,responses,setResponses}) => {
+
   const [submitted, setSubmitted] = useState(false);
   const [selectedLanguage, setSelectedLanguage] = useState('en');
 
