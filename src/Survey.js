@@ -134,10 +134,10 @@ const Survey = ({setNextGame,responses,setResponses}) => {
   const [selectedLanguage, setSelectedLanguage] = useState('en');
 
   useEffect(() => {
-    if (responses['language-proficiency']) {
-      setSelectedLanguage(responses['language-proficiency']);
+    if (responses['question2']) {
+      setSelectedLanguage(responses['question2']);
     }
-  }, [responses['language-proficiency']]);
+  }, [responses['question2']]);
 
   const handleResponse = (questionId, value) => {
     setResponses(prev => ({ ...prev, [questionId]: value }));
@@ -149,7 +149,7 @@ const Survey = ({setNextGame,responses,setResponses}) => {
   };
 
   const getQuestionText = (question) => {
-    if (question.id === 'language-proficiency') return LANGUAGE[selectedLanguage].languageQuestion;
+    if (question.id === 'question2') return LANGUAGE[selectedLanguage].languageQuestion;
     return LANGUAGE[selectedLanguage][question.questionKey || question.id];
   };
 
@@ -179,7 +179,7 @@ const Survey = ({setNextGame,responses,setResponses}) => {
                   }}
                 />
                 <span className="option-text">
-                  {question.id === 'language-proficiency'
+                  {question.id === 'question2'
                     ? currentLang.languages[option]
                     : currentLang[question.optionsKey]
                       ? currentLang[question.optionsKey].find(o => o === option)

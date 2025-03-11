@@ -4,7 +4,9 @@ import "./App.css";
 import CommunityCenter from "./Community";
 import Survey from "./Survey";
 import { createClient } from "@supabase/supabase-js";
-
+const supabaseUrl = "https://hgatxkpmrskbdqigenav.supabase.co";
+const supabaseKey = process.env.REACT_APP_SUPABASE_KEY;
+const supabase = createClient(supabaseUrl, supabaseKey);
 const App = () => {
   const [latestData, setLatestData] = useState({
     timeseries: [],
@@ -40,10 +42,9 @@ const App = () => {
 
   const [responses, setResponses] = useState({});
 
-  const supabaseUrl = "https://hgatxkpmrskbdqigenav.supabase.co";
-  const supabaseKey = process.env.REACT_APP_SUPABASE_KEY;
-  const supabase = () => createClient(supabaseUrl, supabaseKey);
-  console.log(responses);
+
+
+
   useEffect(() => {
     const handleMouseMove = (e) => {
       mousePosition.current = { x: e.clientX, y: e.clientY };
@@ -192,26 +193,33 @@ const App = () => {
     URL.revokeObjectURL(url);
   };
 
-  async function overwriteTable() {
+  const overwriteTable = async () => {
     try {
+      for (let key in responses) {
+        if (dataRef.current.hasOwnProperty(key)) {
+          console.log(dataRef.current);
+          dataRef.current[key] = responses[key];
+        }
+      }
       console.log(dataRef.current);
-
       const { timeseries, ...testDataFields } = dataRef.current;
 
       const { data: dataDataFetch, error: errorDataFetch } = await supabase
         .from("testData")
-        .select();
+        .select(); // Using supabase instance directly, no need for 'await supabase()'
+
       console.log(dataDataFetch, "dataData");
-      // Handle errors during the 'testData' insertion
       if (errorDataFetch) {
-        console.error("Error inserting testData:", errorDataFetch);
+        console.error("Error fetching testData:", errorDataFetch);
         return { data: null, error: errorDataFetch };
       }
-      let testDataId = dataDataFetch?.[0]?.id + 1 ?? 0;
+
+      let testDataId = dataDataFetch?.slice(-1)[0]?.id + 1 ?? 0;
       if (!testDataId) {
         testDataId = 0;
       }
-      //dataData
+
+      // Insert or update the testData table
       const { data: dataData, error: errorData } = await supabase
         .from("testData")
         .upsert({ ...testDataFields, id: testDataId });
@@ -223,7 +231,7 @@ const App = () => {
 
       console.log("Inserted testDataId:", testDataId);
 
-      ///////dataTime
+      // Handle timeseries data
       const { data: dataTime, error: errorTime } = await supabase
         .from("testTime")
         .upsert(
@@ -233,7 +241,6 @@ const App = () => {
           }))
         );
 
-      // Handle errors during the 'testTime' insertion
       if (errorTime) {
         console.error("Error inserting testTime:", errorTime);
         return { data: null, error: errorTime };
@@ -244,7 +251,7 @@ const App = () => {
       console.error("Unexpected error:", error);
       return { data: null, error };
     }
-  }
+  };
 
   return (
     <div className="app-container">
