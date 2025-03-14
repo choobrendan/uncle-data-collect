@@ -35,7 +35,9 @@ const App = () => {
   const mousePosition = useRef({ x: 0, y: 0 });
   const isMouseDown = useRef(false);
   const lastHoverElement = useRef(null);
-  const [nextGame, setNextGame] = useState(2);
+  const [nextGame, setNextGame] = useState(0
+
+  );
   const eyeMovement = useRef({ x: null, y: null });
   const lastScrollPosition = useRef(0);
   const scrollDirection = useRef("none");
@@ -43,7 +45,39 @@ const App = () => {
   const [responses, setResponses] = useState({});
 
 
+  useEffect(() => {
+    const initializeWebGazer = async () => {
+      const webgazer = await window.webgazer
+        .setGazeListener((data) => {
+          if (data) {
+            eyeMovement.current = {
+              x: data.x,
+              y: data.y,
+            };
+          }
+          console.log(data);
+        })
+        .begin();
+      webgazer.showPredictionPoints(false)
+      // Cleanup function
+      return () => {
+        if (window.webgazer) {
+          try {
+            window.webgazer.end();
+          } catch (error) {
+            console.warn('Error ending webgazer:', error);
+          }
+        }
+      };
+    };
 
+   
+
+    // Return cleanup function
+    return () => {
+      initializeWebGazer();
+    };
+  }, []); 
 
   useEffect(() => {
     const handleMouseMove = (e) => {
@@ -108,7 +142,7 @@ const App = () => {
 
       dataRef.current.timeseries = [...dataRef.current.timeseries, newEntry];
       setLatestData({ ...dataRef.current });
-    }, 100);
+    }, 50);
 
     return () => {
       clearInterval(interval);

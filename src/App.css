@@ -20,7 +20,9 @@
   color: #388e3c;
   border-radius: 8px;
 }
-
+#webgazerVideoContainer{
+  display: none !important;
+}
 .court {
   position: relative;
   background-color: #bbdefb;
