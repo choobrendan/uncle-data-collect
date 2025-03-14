@@ -1,0 +1,17 @@
+{
+  "files": {
+    "main.css": "/uncle-data-collect/static/css/main.2cf199e8.css",
+    "main.js": "/uncle-data-collect/static/js/main.20989ac9.js",
+    "static/js/952.6bd63e3c.chunk.js": "/uncle-data-collect/static/js/952.6bd63e3c.chunk.js",
+    "static/js/453.7ef8ba25.chunk.js": "/uncle-data-collect/static/js/453.7ef8ba25.chunk.js",
+    "index.html": "/uncle-data-collect/index.html",
+    "main.2cf199e8.css.map": "/uncle-data-collect/static/css/main.2cf199e8.css.map",
+    "main.20989ac9.js.map": "/uncle-data-collect/static/js/main.20989ac9.js.map",
+    "952.6bd63e3c.chunk.js.map": "/uncle-data-collect/static/js/952.6bd63e3c.chunk.js.map",
+    "453.7ef8ba25.chunk.js.map": "/uncle-data-collect/static/js/453.7ef8ba25.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.2cf199e8.css",
+    "static/js/main.20989ac9.js"
+  ]
+}
