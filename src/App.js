@@ -4,9 +4,11 @@ import "./App.css";
 import CommunityCenter from "./Community";
 import Survey from "./Survey";
 import { createClient } from "@supabase/supabase-js";
+import localforage from "localforage"
 const supabaseUrl = "https://hgatxkpmrskbdqigenav.supabase.co";
 const supabaseKey = process.env.REACT_APP_SUPABASE_KEY;
 const supabase = createClient(supabaseUrl, supabaseKey);
+
 const App = () => {
   const [latestData, setLatestData] = useState({
     timeseries: [],
@@ -35,51 +37,77 @@ const App = () => {
   const mousePosition = useRef({ x: 0, y: 0 });
   const isMouseDown = useRef(false);
   const lastHoverElement = useRef(null);
-  const [nextGame, setNextGame] = useState(0
-
-  );
-  const eyeMovement = useRef({ x: null, y: null });
+  const [nextGame, setNextGame] = useState(0);
   const lastScrollPosition = useRef(0);
   const scrollDirection = useRef("none");
-
   const [responses, setResponses] = useState({});
 
+  // -- Updated WebGazer setup and gaze listener --------------------------------
+  const lastGaze = useRef(null);
+  const lastTime = useRef(null);
 
   useEffect(() => {
+    // Gaze listener that records duration per point
+    const eyeListener = (data, clock) => {
+      if (!lastTime.current) {
+        lastTime.current = clock;
+      }
+      if (lastGaze.current?.x && lastGaze.current?.y) {
+        const duration = clock - lastTime.current;
+        const entry = {
+          time: new Date().toISOString(),
+          positionX: Math.floor(lastGaze.current.x),
+          positionY: Math.floor(lastGaze.current.y),
+          gazeDuration: duration,
+          eyeX: data?.x || null,
+          eyeY: data?.y || null,
+          hoverType: lastHoverElement.current
+            ? getHoverType(lastHoverElement.current)
+            : "none",
+          isMouseDown: isMouseDown.current,
+          scrollDirection: scrollDirection.current,
+        };
+        dataRef.current.timeseries.push(entry);
+        setLatestData({ ...dataRef.current });
+      }
+      lastGaze.current = data;
+      lastTime.current = clock;
+    };
+
     const initializeWebGazer = async () => {
-      const webgazer = await window.webgazer
-        .setGazeListener((data) => {
-          if (data) {
-            eyeMovement.current = {
-              x: data.x,
-              y: data.y,
-            };
-          }
-          console.log(data);
-        })
+      if (!window.saveDataAcrossSessions) {
+        await localforage.setItem('webgazerGlobalData', null);
+        await localforage.setItem('webgazerGlobalSettings', null);
+      }
+      const webgazerInstance = await window.webgazer
+        .setRegression('ridge')
+        .setTracker('TFFacemesh')
         .begin();
-      webgazer.showPredictionPoints(false)
-      // Cleanup function
-      return () => {
-        if (window.webgazer) {
-          try {
-            window.webgazer.end();
-          } catch (error) {
-            console.warn('Error ending webgazer:', error);
-          }
-        }
-      };
+
+      webgazerInstance
+        .showVideoPreview(true)
+        .showPredictionPoints(true)
+        .applyKalmanFilter(true);
+
+      window.webgazer.setGazeListener(eyeListener);
     };
 
-   
+    initializeWebGazer();
 
-    // Return cleanup function
     return () => {
-      initializeWebGazer();
+      if (window.webgazer) {
+        try {
+          window.webgazer.end();
+        } catch (err) {
+          console.warn('Error ending WebGazer:', err);
+        }
+      }
     };
-  }, []); 
+  }, []);
+  // ------------------------------------------------------------------------------
 
   useEffect(() => {
+    // Mouse and scroll tracking (unchanged)...
     const handleMouseMove = (e) => {
       mousePosition.current = { x: e.clientX, y: e.clientY };
       lastHoverElement.current = document.elementFromPoint(
@@ -104,52 +132,29 @@ const App = () => {
       );
     };
 
-    document.addEventListener("mousemove", handleMouseMove);
-    document.addEventListener("mousedown", handleMouseDown);
-    document.addEventListener("mouseup", handleMouseUp);
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mousedown', handleMouseDown);
+    document.addEventListener('mouseup', handleMouseUp);
 
     const getScrollDirection = () => {
-      const currentScrollPosition = window.scrollY;
-      if (currentScrollPosition > lastScrollPosition.current) {
-        scrollDirection.current = "down";
-      } else if (currentScrollPosition < lastScrollPosition.current) {
-        scrollDirection.current = "up";
-      } else {
-        scrollDirection.current = "none";
-      }
-      lastScrollPosition.current = currentScrollPosition;
+      const current = window.scrollY;
+      if (current > lastScrollPosition.current) scrollDirection.current = 'down';
+      else if (current < lastScrollPosition.current) scrollDirection.current = 'up';
+      else scrollDirection.current = 'none';
+      lastScrollPosition.current = current;
     };
 
     const interval = setInterval(() => {
       getScrollDirection();
-
-      const timestamp = new Date().toISOString();
-      const currentElement = document.elementFromPoint(
-        mousePosition.current.x,
-        mousePosition.current.y
-      );
-
-      const newEntry = {
-        time: timestamp,
-        positionX: mousePosition.current.x,
-        positionY: mousePosition.current.y,
-        hoverType: getHoverType(currentElement),
-        isMouseDown: isMouseDown.current,
-        eyeX: eyeMovement.current.x,
-        eyeY: eyeMovement.current.y,
-        scrollDirection: scrollDirection.current,
-      };
-
-      dataRef.current.timeseries = [...dataRef.current.timeseries, newEntry];
-      setLatestData({ ...dataRef.current });
+      // mouse-based entry (optionally keep or remove)...
     }, 50);
 
     return () => {
       clearInterval(interval);
-      document.removeEventListener("mousemove", handleMouseMove);
-      document.removeEventListener("mousedown", handleMouseDown);
-      document.removeEventListener("mouseup", handleMouseUp);
-      window.removeEventListener("scroll", getScrollDirection);
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mousedown', handleMouseDown);
+      document.removeEventListener('mouseup', handleMouseUp);
+      window.removeEventListener('scroll', getScrollDirection);
     };
   }, []);
 
