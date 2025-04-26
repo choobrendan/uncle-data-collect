@@ -62,7 +62,7 @@ const Basketball = ({setNextGame}) => {
         y: Math.random() * (floorHeight - 100) + 50,
       },
       netMovement: true,
-      netMoveSpeed: 0.5,
+      netMoveSpeed: 0.4,
       moveDistance: 50,
     },
     {
@@ -75,7 +75,7 @@ const Basketball = ({setNextGame}) => {
         y: Math.random() * (floorHeight - 100) + 50,
       },
       netMovement: true,
-      netMoveSpeed: 0.3,
+      netMoveSpeed: 0.2,
       moveDistance: 120,
     },
     {
@@ -88,7 +88,7 @@ const Basketball = ({setNextGame}) => {
         y: Math.random() * (floorHeight - 100) + 50,
       },
       netMovement: true,
-      netMoveSpeed: 0.8,
+      netMoveSpeed: 0.6,
       moveDistance: 140,
     },
   ];

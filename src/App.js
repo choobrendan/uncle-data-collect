@@ -58,7 +58,6 @@ const App = () => {
           time: new Date().toISOString(),
           positionX: Math.floor(lastGaze.current.x),
           positionY: Math.floor(lastGaze.current.y),
-          gazeDuration: duration,
           eyeX: data?.x || null,
           eyeY: data?.y || null,
           hoverType: lastHoverElement.current
@@ -279,7 +278,7 @@ const App = () => {
             testDataId: testDataId,
           }))
         );
-
+console.log("ok done")
       if (errorTime) {
         console.error("Error inserting testTime:", errorTime);
         return { data: null, error: errorTime };
